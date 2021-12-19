@@ -5,9 +5,3 @@ exports.home = (req, res) => {
   });
 };
 
-exports.login = (req, res) => {
-  res.status(200).json({
-    success: true,
-    greeting: "Hello from login",
-  });
-};
