@@ -1,7 +1,12 @@
 const app = require('./app');
+const connectWithDb = require('./config/db');
 require('dotenv').config();
 
 
+//Connection with DB
+
+
+connectWithDb();
 
 
 //Port to Listen 
