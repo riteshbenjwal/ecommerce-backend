@@ -141,24 +141,24 @@ exports.forgotPassword = BigPromise(async (req, res, next) => {
 });
 
 exports.passwordReset = BigPromise(async (req, res, next) => {
-
   const token = req.params.token;
   const encryToken = await crypto
-  .createHash("sha256")
-  .update(token)
-  .digest("hex");
-  
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
 
   const user = await User.findOne({
     encryToken,
     forgotPasswordExpiry: { $gt: Date.now() },
-  })
-if(!user){
-  return next(new CustomError("Token is invalid or expired", 400));
-}
+  });
+  if (!user) {
+    return next(new CustomError("Token is invalid or expired", 400));
+  }
 
-  if(req.body.password !== req.body.confirmPassword){
-    return next(new CustomError("Password and Confirm Password does not match", 400));
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(
+      new CustomError("Password and Confirm Password does not match", 400)
+    );
   }
 
   user.password = req.body.password;
@@ -168,5 +168,12 @@ if(!user){
   await user.save();
 
   cookieToken(user, res);
+});
 
+exports.getLoggedInUserDetails = BigPromise(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  res.status(200).json({
+    success: true,
+    user,
+  });
 });
