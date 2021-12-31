@@ -24,4 +24,3 @@ exports.isLoggedIn = BigPromise(async (req, res, next) => {
 
   next();
 });
-
