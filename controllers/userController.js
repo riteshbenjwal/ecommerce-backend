@@ -240,6 +240,35 @@ exports.updateUserDetails = BigPromise(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    user
+    user,
+  });
+});
+
+exports.adminAllUser = BigPromise(async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+
+
+//For email and name only
+
+exports.adminAllUserData = BigPromise(async (req, res, next) => {
+  const users = await User.find();
+
+  users.forEach(async (user) => {
+    user._id = undefined;
+    user.role = undefined;
+    user.createdAt = undefined;
+    user.__v = undefined;
+    user.photo = undefined;
+  });
+
+  res.status(200).json({
+    success: true,
+    users,
   });
 });

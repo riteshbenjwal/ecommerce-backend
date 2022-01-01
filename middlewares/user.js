@@ -24,3 +24,14 @@ exports.isLoggedIn = BigPromise(async (req, res, next) => {
 
   next();
 });
+
+exports.customRole = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new CustomError("You are not authorized to access this page", 401)
+      );
+    }
+    next();
+  };
+};
