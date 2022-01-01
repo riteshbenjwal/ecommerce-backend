@@ -12,7 +12,11 @@ const {
   changePassword,
   updateUserDetails,
   adminAllUser,
-  adminAllUserData
+  adminAllUserData,
+  managerAllUser,
+  admingetOneUser,
+  adminUpdateOneUserDetails,
+  adminDeleteOneUserDetails,
 } = require("../controllers/userController");
 
 const { isLoggedIn, customRole } = require("../middlewares/user");
@@ -26,9 +30,23 @@ router.route("/userdashboard").get(isLoggedIn, getLoggedInUserDetails);
 router.route("/password/update").post(isLoggedIn, changePassword);
 router.route("/userdashboard/update").post(isLoggedIn, updateUserDetails);
 
-
+// admin only route
 
 router.route("/admin/users").get(isLoggedIn, customRole("admin"), adminAllUser);
-router.route("/admin/users/test").get(isLoggedIn, customRole("admin"), adminAllUserData);
+router
+  .route("/admin/users/test")
+  .get(isLoggedIn, customRole("admin"), adminAllUserData);
+
+router
+  .route("/admin/user/:id")
+  .get(isLoggedIn, customRole("admin"), admingetOneUser)
+  .put(isLoggedIn, customRole("admin"), adminUpdateOneUserDetails)
+  .delete(isLoggedIn, customRole("admin"), adminDeleteOneUserDetails);
+
+//manager only route
+
+router
+  .route("/manager/users")
+  .get(isLoggedIn, customRole("manager"), managerAllUser);
 
 module.exports = router;
