@@ -133,3 +133,27 @@ exports.adminUpdateOneProduct = BigPromise(async (req, res, next) => {
     product,
   });
 });
+
+exports.adminDeleteOneProduct = BigPromise(async (req, res, next) => {
+  const product = await Product.find(req.params.id);
+
+  if (!product) {
+    return next(new CustomError("No Product found with this id", 401));
+  }
+
+  //destroy  images
+
+  for (let index = 0; index < product.photos.length; index++) {
+    const res = await cloudinary.v2.uploader.destroy(product.photos[index]);
+  }
+
+  await product.remove()
+
+  res.status(200).json({
+    success: true,
+   message: "Product was deleted successfully"
+  });
+
+
+
+});
