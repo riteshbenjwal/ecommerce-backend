@@ -76,9 +76,7 @@ exports.getOneProduct = BigPromise(async (req, res, next) => {
   });
 });
 
-
 // admin only controllers
-
 
 exports.adminGetAllProduct = BigPromise(async (req, res, next) => {
   const products = await Product.find();
@@ -86,5 +84,52 @@ exports.adminGetAllProduct = BigPromise(async (req, res, next) => {
   res.status(200).json({
     success: true,
     products,
+  });
+});
+
+exports.adminUpdateOneProduct = BigPromise(async (req, res, next) => {
+  const product = await Product.find(req.params.id);
+
+  if (!product) {
+    return next(new CustomError("No Product found with this id", 401));
+  }
+
+  let imageArray = [];
+
+  if (req.files) {
+    //destroy existing images
+
+    for (let index = 0; index < product.photos.length; index++) {
+      const res = await cloudinary.v2.uploader.destroy(product.photos[index]);
+    }
+
+    //upload and save the images
+
+    for (let index = 0; index < req.files.photos.length; index++) {
+      let result = await cloudinary.v2.uploader.upload(
+        req.files.photos[index].tempFilePath,
+        {
+          folder: "products", //folder name -> .env
+        }
+      );
+
+      imageArray.push({
+        id: result.public_id,
+        secure_url: result.secure_url,
+      });
+    }
+  }
+
+  req.body.photos = imagesArray;
+
+  product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    product,
   });
 });
