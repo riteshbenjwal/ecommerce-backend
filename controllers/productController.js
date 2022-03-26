@@ -2,7 +2,7 @@ const Product = require("../models/product");
 const BigPromise = require("../middlewares/bigPromise");
 const CustomError = require("../utils/customError");
 const cloudinary = require("cloudinary");
-const WhereClause = "../utils/whereClause";
+const WhereClause = require("../utils/whereClause");
 
 exports.addProduct = BigPromise(async (req, res, next) => {
   // images
@@ -88,22 +88,20 @@ exports.adminGetAllProduct = BigPromise(async (req, res, next) => {
 });
 
 exports.adminUpdateOneProduct = BigPromise(async (req, res, next) => {
-  const product = await Product.find(req.params.id);
+  let product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new CustomError("No Product found with this id", 401));
+    return next(new CustomError("No product found with this id", 401));
   }
-
-  let imageArray = [];
+  let imagesArray = [];
 
   if (req.files) {
-    //destroy existing images
-
+    //destroy the existing image
     for (let index = 0; index < product.photos.length; index++) {
-      const res = await cloudinary.v2.uploader.destroy(product.photos[index]);
+      const res = await cloudinary.v2.uploader.destroy(
+        product.photos[index].id
+      );
     }
-
-    //upload and save the images
 
     for (let index = 0; index < req.files.photos.length; index++) {
       let result = await cloudinary.v2.uploader.upload(
@@ -113,7 +111,7 @@ exports.adminUpdateOneProduct = BigPromise(async (req, res, next) => {
         }
       );
 
-      imageArray.push({
+      imagesArray.push({
         id: result.public_id,
         secure_url: result.secure_url,
       });
@@ -135,7 +133,7 @@ exports.adminUpdateOneProduct = BigPromise(async (req, res, next) => {
 });
 
 exports.adminDeleteOneProduct = BigPromise(async (req, res, next) => {
-  const product = await Product.find(req.params.id);
+  const product = await Product.findById(req.params.id);
 
   if (!product) {
     return next(new CustomError("No Product found with this id", 401));
@@ -147,13 +145,10 @@ exports.adminDeleteOneProduct = BigPromise(async (req, res, next) => {
     const res = await cloudinary.v2.uploader.destroy(product.photos[index]);
   }
 
-  await product.remove()
+  await product.remove();
 
   res.status(200).json({
     success: true,
-   message: "Product was deleted successfully"
+    message: "Product was deleted successfully",
   });
-
-
-
 });
